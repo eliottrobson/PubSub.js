@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>PubSub.js - Demo</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.3.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/themes/prism.min.css">
+    <style>
+        [v-cloak] {
+            visibility: hidden;
+        }
+
+        .content {
+            overflow-x: auto;
+        }
+
+        .token.number {
+            -webkit-box-align: inherit;
+            -ms-flex-align: inherit;
+            align-items: inherit;
+            background-color: inherit;
+            border-radius: inherit;
+            display: inline;
+            font-size: inherit;
+            height: inherit;
+            -webkit-box-pack: inherit;
+            -ms-flex-pack: inherit;
+            justify-content: inherit;
+            margin-right: inherit;
+            min-width: inherit;
+            padding: 0;
+            text-align: inherit;
+            vertical-align: inherit;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.1/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.6.0/prism.min.js"></script>
+    <script src="https://cdn.rawgit.com/eliottrobson/PubSub.js/v1.0.0/pubsub.js"></script>
+</head>
+
+<body>
+    <section class="hero is-medium is-dark is-bold">
+        <div class="hero-body">
+            <div class="container">
+                <div class="columns is-vcentered">
+                    <div class="column">
+                        <h1 class="title">
+                            PubSub.js (1.0.0)
+                        </h1>
+                        <h2 class="subtitle">
+                            Demo
+                        </h2>
+                    </div>
+                    <div class="column is-narrow">
+                        <a href="https://github.com/eliottrobson/PubSub.js" class="button is-large is-dark is-inverted">
+                            <span class="icon"><i class="fa fa-github"></i></span>
+                            <span>Download</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h1 class="title">Demo</h1>
+
+        <div id="demo" class="columns">
+            <div class="column">
+                <form @submit.prevent="create">
+                    <h2 class="subtitle">Settings</h2>
+
+                    <label class="label">Message</label>
+                    <p class="control">
+                        <input class="input" type="text" v-model="message">
+                    </p>
+
+                    <label class="label">Event</label>
+                    <p class="control">
+                        <label class="radio">
+                            <input type="radio" name="type" value="message" v-model="type">
+                            message
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="type" value="message.normal" v-model="type">
+                            message.normal
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="type" value="message.important" v-model="type">
+                            message.important
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="type" value="app.login" v-model="type">
+                            app.login
+                        </label>
+                    </p>
+
+                    <input type="submit" class="button is-dark" value="Trigger">
+                    <input type="button" class="button is-primary" value="Clear Log" @click="clear">
+                </form>
+
+                <br />
+                <pre><code>{{ output }}</code></pre>
+            </div>
+            <div class="column">
+                <pre v-cloak><code v-html="source"></code></pre>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let events = new PubSub();
+
+        new Vue({
+            el: "#demo",
+            data: {
+                message: "My Message",
+                type: "message",
+                output: ""
+            },
+            mounted: function() {
+                var vm = this;
+
+                events.on('message', function(data, notification) {
+                    vm.log("Message: " + data);
+                });
+
+                events.on('message.normal', function(data, notification) {
+                    vm.log("Normal Message");
+                });
+
+                events.on('message.important', function(data, notification) {
+                    vm.log("Important Message");
+                });
+            },
+            computed: {
+                source: function() {
+                    let code = `let events = new PubSub();\n\n`;
+
+                    code += `events.on('message', function (data, notification) {\n`;
+                    code += `    log("Message: " + data);\n`;
+                    code += `});\n\n`;
+
+                    code += `events.on('message.normal', function (data, notification) {\n`;
+                    code += `    log("Normal Message");\n`;
+                    code += `});\n\n`;
+
+                    code += `events.on('message.important', function (data, notification) {\n`;
+                    code += `    log("Important Message");\n`;
+                    code += `});\n\n`;
+
+                    code += `events.trigger("${this.type}", "${this.message}");`;
+
+                    return Prism.highlight(code, Prism.languages.javascript);
+                }
+            },
+            methods: {
+                log: function(message) {
+                    this.output += `${message}\n`;
+                },
+                clear: function() {
+                    this.output = "";
+                },
+                create: function() {
+                    events.trigger(this.type, this.message);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
