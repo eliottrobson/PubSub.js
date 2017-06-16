@@ -2,6 +2,8 @@
 
 PubSub.js is a fast and powerful pub-sub event dispatcher built with namespace support and a dependency free experience.
 
+## [View Live Demo](https://eliottrobson.github.io/PubSub.js/)
+
 ## Table of contents
 
 - [Quick start](#quick-start)
